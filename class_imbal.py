@@ -5,14 +5,24 @@ from imblearn.under_sampling import TomekLinks
 import pandas as pd
 from collections import Counter
 
-def class_imbalance(dataframe):
-    
+def class_imbalance(dataframe, class_col_name):
+    '''
+    The fuction get as arguements the full dataframe and the name of colum which contains the classes. 
+    The fuction woks for binary datasets. It checks if the data are imbalanced and if it is true, the fuction
+    applies one of the following choices 1.Random Under-Sampling for majority class', 2.Random Over-Sampling for minority class',
+    3.Over-sampling using SMOTE', 4.Under-sampling using Tomek Links', 0.Split to train - test set without any modification.
+    Finally return x_train, x_test, y_train, y_test with 0.25 test-size. The class colum renamed to Classes.
+    '''
+    for name in dataframe.columns:
+        name = str(name)
+        if name == class_col_name:    
+            dataframe = dataframe.rename(columns={name:'Classes'})
     
     print("A quick look at dataframe size:",dataframe.shape)
     
     # print(class_name)
     # c = class_name
-    count = dataframe.Class.value_counts()
+    count = dataframe.Classes.value_counts()
     minority = 0
     majority = 0
     
@@ -34,8 +44,8 @@ def class_imbalance(dataframe):
         
         
     #Split to train and test sets with 0.25 test size
-    y = dataframe.Class
-    x = dataframe.drop('Class', axis=1)
+    y = dataframe.Classes
+    x = dataframe.drop('Classes', axis=1)
     
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=27)
     
@@ -44,8 +54,8 @@ def class_imbalance(dataframe):
     
     
     #Separate minority and majority classes
-    minority_df = X[X.Class==minority]
-    majority_df = X[X.Class==majority]
+    minority_df = X[X.Classes==minority]
+    majority_df = X[X.Classes==majority]
     print('Majority len: %g\nMinority len:%g'%(len(majority_df), len(minority_df)))
     
     
@@ -80,11 +90,11 @@ def class_imbalance(dataframe):
         
             #Combine minority and downsampled majority
             downsampled = pd.concat([majority_downsampled, minority_df])
-            print(downsampled.Class.value_counts())
+            print(downsampled.Classes.value_counts())
             
             #Reconstruct x_tran, y_train
-            y_train = downsampled.Class
-            x_train = downsampled.drop('Class', axis=1)
+            y_train = downsampled.Classes
+            x_train = downsampled.drop('Classes', axis=1)
         
         #If selected method is 'Random Over-Sampling for minority class'
         if method == 2:
@@ -96,11 +106,11 @@ def class_imbalance(dataframe):
             
             #Combine minority and downsampled majority
             upsampled = pd.concat([minority_upsampled, majority_df])
-            print(upsampled.Class.value_counts())
+            print(upsampled.Classes.value_counts())
             
             #Reconstruct x_tran, y_train
-            y_train = upsampled.Class
-            x_train = upsampled.drop('Class', axis=1)
+            y_train = upsampled.Classes
+            x_train = upsampled.drop('Classes', axis=1)
             
         #If selected method is 'Over-sampling using SMOTE'
         if method == 3:
@@ -118,7 +128,7 @@ def class_imbalance(dataframe):
             print('Resampled dataset shape %s' %Counter(y_train))
             
         #If selected method is 'Split to train - test set without any modification'
-        if method == 4:
+        if method == 0:
             print("Return train - test set without any modification")
             
         return(x_train, x_test, y_train, y_test)
