@@ -1,4 +1,5 @@
 from class_imbal import *
+from Multi_Label import *
 import pandas as pd
 import numpy as np
 import matplotlib as plt
@@ -8,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score
 
 
-#### reading artff files
+#### reading artff files of a gene instance file.
 data = arff.loadarff('genbase.arff')
 df = pd.DataFrame(data[0])
 print(df)
@@ -23,14 +24,9 @@ df=df.drop('protein',axis=1)
 for name in df.columns:
     print("\nProcessed:",name)
     rr= df.loc[:,name].to_numpy()
-    #for arta in rr:
-    #    if arta==b'YES' :
-    #      print("Found at",name)
-    #print(np.any(rr == b'NO'))
     tt=np.where(((rr==b'YES') | (rr==b'1')),1,0)
-    #print(np.any(tt == 1))
     df.loc[:,name]=tt
-    #print(df)
+Y=df.to_numpy()
 
 df.insert(loc=0,column="ft4",value=yy[:,5])
 df.insert(loc=0,column="ft3",value=yy[:,4])
@@ -38,17 +34,19 @@ df.insert(loc=0,column="ft2",value=yy[:,3])
 df.insert(loc=0,column="ft1",value=yy[:,2])
 df.insert(loc=0,column="ft0",value=yy[:,1])
 
-
-
+##############################################
+#####  Panos
 #df = pd.read_csv('creditcard.csv')
-
-ttt=df.head()
-print(df)
-
 x_train, x_test, y_train, y_test = class_imbalance(df, class_col_name='Class')
 
-upsampled = LogisticRegression(solver='liblinear').fit(x_train, y_train)
+##############################################
+#####  Xaris
+upsampled = LogisticRegression(solver='liblinear')
 
+####### returns the new multi-label classifier.
+upsampled = class_multi_label(x_train, y_train,upsampled,0)
+
+upsampled.fit(x_train, y_train)
 y_pred = upsampled.predict(x_test)
 
 print("Accurancy:", accuracy_score(y_test, y_pred))
