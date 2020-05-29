@@ -7,6 +7,7 @@ import seaborn as sns
 from scipy.io import arff
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score
+from sklearn.calibration import CalibratedClassifierCV
 
 
 #### reading artff files of a gene instance file.
@@ -68,13 +69,38 @@ print(df)
 #### and as output return the multi_label columns and NOT the multi_class column
 x_train, x_test, y_train, y_test = class_imbalance(df, class_col_name='Class')
 
+#################################################################################################################
+#Pano thelei apo edo kai kato douleia kai alli aplos kane to imbalance gia na mporeso na kano to debug
+
+###############################################
+##### detect cost sensitivity and act with weighted sampling
+
 ##############################################
-upsampled = class_multi_label(x_train, y_train,upsampled,0)
+#it is required a base algorithm callibration before any cost sensitivity action
+upsampled=CalibratedClassifierCV(base_estimator=upsampled, method='sigmoid', cv=None)
+fclf=""
+fclf[0] = class_multi_label(x_train, y_train,upsampled,1)
+fclf[1] = class_multi_label(x_train, y_train,upsampled,2)
+fclf[2] = class_multi_label(x_train, y_train,upsampled,3)
+fclf[3] = class_multi_label(x_train, y_train,upsampled,4)
+fclf[4] = class_multi_label(x_train, y_train,upsampled,5)
+upsampled=CalibratedClassifierCV(base_estimator=upsampled, method='isotonic', cv=None)
+fclf[5] = class_multi_label(x_train, y_train,upsampled,1)
+fclf[6] = class_multi_label(x_train, y_train,upsampled,2)
+fclf[7] = class_multi_label(x_train, y_train,upsampled,3)
+fclf[8] = class_multi_label(x_train, y_train,upsampled,4)
+fclf[9] = class_multi_label(x_train, y_train,upsampled,5)
 
-upsampled.fit(x_train, y_train)
-y_pred = upsampled.predict(x_test)
+#Pano thelei kai alli douleia edo aplos kane to imbalance gia na mporeso na kano debug edo
+for clf in fclf:
+    clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
 
-print("Accurancy:", accuracy_score(y_test, y_pred))
-print("F1 score:", f1_score(y_test, y_pred))
+    #print(classification_report(y_test, y_pred, target_names=data.target_names))
+    #loss = cost_loss(y_test, y_pred, cost_matrix)
+    #print(confusion_matrix(y_test, y_pred).T
 
-help(class_imbalance)
+    print("Accurancy:", accuracy_score(y_test, y_pred))
+    print("F1 score:", f1_score(y_test, y_pred))
+
+    help(class_imbalance)
