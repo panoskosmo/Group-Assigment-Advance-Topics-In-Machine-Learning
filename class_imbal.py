@@ -6,9 +6,8 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE
 def class_imbal(df,n_feature):
        
     classes = df.Class.unique()
-    print("Number of Classes:", classes)
-    
-    print("Number of Len:", len(classes))
+        
+    print("Number of Classes:", len(classes))
         
     x = df.iloc[:,0:n_feature] # features
     y = df.Class #classes
