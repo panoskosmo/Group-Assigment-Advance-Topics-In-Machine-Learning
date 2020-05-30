@@ -44,7 +44,7 @@ df.insert(loc=0,column="ft0",value=yy[:,1])
 upsampled = LogisticRegression(solver='liblinear')
 
 ###############################################
-# convert Y from multilable to multi class
+# convert Y from multilabel to multi class
 yt=multi_labelTo_multi_class(df.to_numpy(),upsampled)
 
 ##################################################################################
@@ -67,7 +67,8 @@ print(df)
 
 #### WARNING  the returned x_train and x_test must exclude the multi_label info
 #### and as output return the multi_label columns and NOT the multi_class column
-x_train, x_test, y_train, y_test = class_imbalance(df, class_col_name='Class')
+x_train, x_test, y_train, y_test, ml_data = class_imbal(df, 5)
+
 
 #################################################################################################################
 #Pano thelei apo edo kai kato douleia kai alli aplos kane to imbalance gia na mporeso na kano to debug
