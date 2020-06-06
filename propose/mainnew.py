@@ -1,6 +1,5 @@
 from class_imbal import *
 from Multi_Label import *
-from Metrics import *
 import pandas as pd
 import numpy as np
 import matplotlib as plt
@@ -10,6 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.svm import SVC
+import costcla as csl
 
 
 #### reading artff files of a gene instance file.
@@ -42,11 +44,14 @@ df.insert(loc=0,column="ft0",value=yy[:,1])
 ###############################################
 ###########  get basic model
 #upsampled = LogisticRegression(solver='liblinear')
-upsampled = RandomForestClassifier(n_estimators=100)
-
+arclfs = [RandomForestClassifier(n_estimators=100, random_state=0),
+          csl.models.CostSensitiveRandomForestClassifier()
+          SVC(kernel='linear', probability=True, C=1),
+         ]
+choosenclsfr=0
 ###############################################
 # convert Y from multilabel to multi class
-transformer, yt=multi_labelTo_multi_class(df.to_numpy(),upsampled)
+transformer, yt=multi_labelTo_multi_class(df.to_numpy(),arclfs[choosenclsfr])
 
 ##################################################################################
 #WARNING we add at the end of dataframe a column 'Class'
@@ -73,8 +78,8 @@ x_train, x_test, y_train, y_test = class_imbal(df, 5,transformer)
 
 ##############################################
 #it is required a base algorithm callibration before any cost sensitivity action
-upsampled=CalibratedClassifierCV(base_estimator=upsampled, method='sigmoid', cv=None)
-upsampled2=CalibratedClassifierCV(base_estimator=upsampled, method='isotonic', cv=None)
+upsampled=CalibratedClassifierCV(base_estimator=arclfs[choosenclsfr], method='sigmoid', cv=None)
+upsampled2=CalibratedClassifierCV(base_estimator=arclfs[choosenclsfr], method='isotonic', cv=None)
 fclf = {class_multi_label(x_train, y_train,upsampled,1),
         class_multi_label(x_train, y_train,upsampled,2),
         class_multi_label(x_train, y_train,upsampled,3),

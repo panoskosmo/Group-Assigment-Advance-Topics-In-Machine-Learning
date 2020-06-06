@@ -54,8 +54,9 @@ def class_imbal(df,n_feature, transformer):
             ros = RandomOverSampler(sampling_strategy='auto', random_state=0)        
             x_train, y_train = ros.fit_resample(x_train, y_train)
             x_train=x_train.to_numpy()
-            y_train=transformer.inverse_transform(y_train)
-        if method == 2:  
+            y_train=transformer.inverse_transform(y_train.to_numpy())
+            y_test=transformer.inverse_transform(y_test.to_numpy())
+        if method == 2:
             
             print("\n\n-----------------------------------------------------------\n")
             print('Random Over-Sampling (not majority)')
@@ -63,7 +64,8 @@ def class_imbal(df,n_feature, transformer):
             ros = RandomOverSampler(sampling_strategy='not majority', random_state=0)        
             x_train, y_train = ros.fit_resample(x_train, y_train)
             x_train=x_train.to_numpy()
-            y_train=transformer.inverse_transform(y_train)
+            y_train=transformer.inverse_transform(y_train.to_numpy())
+            y_test=transformer.inverse_transform(y_test.to_numpy())
 
         if method == 3:  
             
@@ -73,7 +75,8 @@ def class_imbal(df,n_feature, transformer):
             ros = RandomOverSampler(sampling_strategy='all', random_state=0)        
             x_train, y_train = ros.fit_resample(x_train, y_train)
             x_train=x_train.to_numpy()
-            y_train=transformer.inverse_transform(y_train)
+            y_train=transformer.inverse_transform(y_train.to_numpy())
+            y_test=transformer.inverse_transform(y_test.to_numpy())
 
         if method == 4:  
             
@@ -82,8 +85,8 @@ def class_imbal(df,n_feature, transformer):
             
             sm = SMOTE(sampling_strategy='auto', random_state=0, k_neighbors=6)        
             x_train, y_train = sm.fit_resample(x_train, y_train)
-            x_train=x_train.to_numpy()
-            y_train=transformer.inverse_transform(y_train)
+            y_train=transformer.inverse_transform(y_train.to_numpy())
+            y_test=transformer.inverse_transform(y_test.to_numpy())
 
         if method == 5:  
             
@@ -92,8 +95,8 @@ def class_imbal(df,n_feature, transformer):
             
             sm = SMOTE(sampling_strategy='not majority', random_state=0, k_neighbors=6)        
             x_train, y_train = sm.fit_resample(x_train, y_train)
-            x_train=x_train.to_numpy()
-            y_train=transformer.inverse_transform(y_train)
+            y_train=transformer.inverse_transform(y_train.to_numpy())
+            y_test=transformer.inverse_transform(y_test.to_numpy())
 
             
         if method == 6:  
@@ -103,8 +106,8 @@ def class_imbal(df,n_feature, transformer):
             
             sm = SMOTE(sampling_strategy='all', random_state=0, k_neighbors=6)        
             x_train, y_train = sm.fit_resample(x_train, y_train)
-            x_train=x_train.to_numpy()
-            y_train=transformer.inverse_transform(y_train)
+            y_train=transformer.inverse_transform(y_train.to_numpy())
+            y_test=transformer.inverse_transform(y_test.to_numpy())
 
         
         if method == 0:
@@ -113,5 +116,4 @@ def class_imbal(df,n_feature, transformer):
 
         #print("Resampled classes:\n")
         #print(sorted(Counter(y_train).items()))
-        y_test=transformer.inverse_transform(y_test)
         return(x_train, x_test, y_train, y_test)
