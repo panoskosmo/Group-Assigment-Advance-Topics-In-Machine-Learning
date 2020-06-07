@@ -2,8 +2,9 @@ from sklearn.model_selection import train_test_split
 from collections import Counter
 import pandas as pd
 from imblearn.over_sampling import RandomOverSampler, SMOTE
+import numpy as np
 
-def class_imbal(df,n_feature, transformer):
+def class_imbal(df,n_feature, transformer,costclass,costval):
        
     classes = df.Class.unique()
         
@@ -20,8 +21,15 @@ def class_imbal(df,n_feature, transformer):
     print("Classes before resampling:\n")
     print(sorted(Counter(y_train).items()))
     print("\n\n-----------------------------------------------------------\n")
-    
-####################################################################################    
+
+    ######################################
+    ##### random over sampling on specific class
+    ttt=np.count_nonzero(y_train.to_numpy() == costclass)
+    if ttt>0:
+        ros = RandomOverSampler(sampling_strategy={costclass:(ttt*costval)}, random_state=0)
+        x_train, y_train = ros.fit_resample(x_train, y_train)
+
+    ####################################################################################
 ###### Menu
 ####################################################################################
     print('\n')
@@ -116,4 +124,4 @@ def class_imbal(df,n_feature, transformer):
 
         #print("Resampled classes:\n")
         #print(sorted(Counter(y_train).items()))
-        return(x_train, x_test, y_train, y_test)
+        return(x_train, x_test.to_numpy(), y_train, y_test)
