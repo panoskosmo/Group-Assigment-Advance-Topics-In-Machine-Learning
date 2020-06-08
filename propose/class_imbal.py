@@ -116,9 +116,9 @@ def class_imbal(df,n_feature, transformer,costclass,costval):
                 y_test=transformer.inverse_transform(y_test.to_numpy())
                 
             except ValueError:
-                       print('\nWarning!!! Not enough instances per class for SMOTE executing!! (Number of neighbors=2)')
-                       print('Try something else...') 
-                       sys.exit("SMOTE could not happen! Not enough instances per class!")
+                    print('\nWarning!!! Not enough instances per class for SMOTE executing!! (Number of neighbors=2)')
+                    print('Try something else...') 
+                    sys.exit("SMOTE could not happen! Not enough instances per class!")
 
             
         if method == 6:  
@@ -134,8 +134,9 @@ def class_imbal(df,n_feature, transformer,costclass,costval):
                 sys.exit("SMOTE could not happen! Not enough instances per class!")
                 
             except ValueError:
-               print('\nWarning!!! Not enough instances per class for SMOTE executing!! (Number of neighbors=2)')
-               print('Try something else...') 
+                   print('\nWarning!!! Not enough instances per class for SMOTE executing!! (Number of neighbors=2)')
+                   print('Try something else...') 
+                   sys.exit("SMOTE could not happen! Not enough instances per class!")
 
         
         if method == 0:
