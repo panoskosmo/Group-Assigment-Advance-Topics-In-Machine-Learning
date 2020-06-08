@@ -10,6 +10,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.svm import SVC
+from skmultilearn.ext import download_meka
+from skmultilearn.ext import Meka
 
 
 #### reading artff files of a gene instance file.
@@ -30,6 +34,7 @@ for name in df.columns:
     tt=np.where(((rr==b'YES') | (rr==b'1')),1,0)
     df.loc[:,name]=tt
 
+
 ##########################################
 ### this are the feature instances
 ### from column 5> are the multi_label classes
@@ -41,60 +46,67 @@ df.insert(loc=0,column="ft0",value=yy[:,1])
 
 ###############################################
 ###########  get basic model
-#upsampled = LogisticRegression(solver='liblinear')
-upsampled = RandomForestClassifier(n_estimators=100)
-
+arclfs = [[RandomForestClassifier(n_estimators=100, random_state=0),"weka.classifiers.trees.RandomForest"],
+          [SVC(kernel='linear', probability=True, C=1),"weka.classifiers.functions.LibSVM"]
+         ]
+choosenclsfr=0
 ###############################################
 # convert Y from multilabel to multi class
-transformer, yt=multi_labelTo_multi_class(df.to_numpy(),upsampled)
+transformer, yt=multi_labelTo_multi_class(df.to_numpy(),arclfs[choosenclsfr][0])
 
 ##################################################################################
-#WARNING we add at the end of dataframe a column 'Class'
-#with the multi-class values of multilabel classes found
-#on the original df dataframe.
-#We do not drop the multi_label data column as they will be used
-#by the final multi_label classificator
-#Any imbalance algorithm will take into account the 5 first feature
-#columns and #the last multi-class column and not the multi-label columns,
-#but the multi_label columns must still exist and copied furing imbalance
-#algorithms as to be used later on the final multi-lable classificator.
-##################################################################################
-#unique,count= np.unique(yt, return_counts=True)
-
 df.insert(loc=len(df.columns),column='Class',value=yt)
-print(df)
 
 ###############################################
 ##### detect cost sensitivity and act with weighted sampling
+print("The Labels are:\n")
+print(df.iloc[:,6:])
+costclass= int(input("\n\n\nWhich label is cost sensitive type the class number to over sample it:"))
+costval= int(input("\nWhat is the cost?(integer):"))
 
-#### WARNING  the returned x_train and x_test must exclude the multi_label info
-#### and as output return the multi_label columns and NOT the multi_class column
-x_train, x_test, y_train, y_test = class_imbal(df, 5,transformer)
+#perfom the imbalancing actions
+x_train, x_test, y_train, y_test = class_imbal(df, 5,transformer,costclass,costval)
+
 
 ##############################################
 #it is required a base algorithm callibration before any cost sensitivity action
-upsampled=CalibratedClassifierCV(base_estimator=upsampled, method='sigmoid', cv=None)
-upsampled2=CalibratedClassifierCV(base_estimator=upsampled, method='isotonic', cv=None)
-fclf = {class_multi_label(x_train, y_train,upsampled,1),
-        class_multi_label(x_train, y_train,upsampled,2),
-        class_multi_label(x_train, y_train,upsampled,3),
-        class_multi_label(x_train, y_train,upsampled,4),
-        class_multi_label(x_train, y_train,upsampled,5),
-        class_multi_label(x_train, y_train,upsampled2,1),
-        class_multi_label(x_train, y_train,upsampled2,2),
-        class_multi_label(x_train, y_train,upsampled2,3),
-        class_multi_label(x_train, y_train,upsampled2,4),
-        class_multi_label(x_train, y_train,upsampled2,5)}
+upsampled=CalibratedClassifierCV(base_estimator=arclfs[0][0], method='sigmoid', cv=None)
+upsampled2=CalibratedClassifierCV(base_estimator=arclfs[1][0], method='isotonic', cv=None)
+fclf = [[class_multi_label(x_train, y_train,upsampled,arclfs[0][1],1),"Applying binary relevance"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],2),"Duplicates multi-label examples into examples with one label each"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],3),"Applying calibrated label ranking"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],4),"Applying Chain Classifier"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],5),"Applying powerset NO pruning"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],6),"Applying powerset with pruning"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],7),"Applying Random-k Labelsets"],
+        [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],8),"Applying pairwise comparison"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],1),"Applying binary relevance"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],2),"Duplicates multi-label examples into examples with one label each"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],3),"Applying calibrated label ranking"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],4),"Applying Chain Classifier"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],5),"Applying powerset NO pruning"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],6),"Applying powerset with pruning"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],7),"Applying Random-k Labelsets"],
+        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],8),"Applying pairwise comparison"]
+       ]
+
+print("\n\nEntering main fitting and predicting loop\n\n")
 
 for clf in fclf:
-    clf.fit(x_train, y_train)
-    y_pred = clf.predict(x_test)
+    print(clf[1])
+    if clf[0]==0:
+        continue;
+    clf[0].fit(x_train, y_train)
+    y_pred = clf[0].predict(x_test)
+    print("Some evaluation metrics for classifier:\n")
+    metrics(x_train, x_test, y_train, y_test, y_pred, labels=df.Class)
+    
 
     #print(classification_report(y_test, y_pred, target_names=data.target_names))
     #loss = cost_loss(y_test, y_pred, cost_matrix)
     #print(confusion_matrix(y_test, y_pred).T
 
-    print("Accurancy:", accuracy_score(y_test, y_pred))
-    print("F1 score:", f1_score(y_test, y_pred))
+    # print("Accurancy:", accuracy_score(y_test, y_pred))
+    # print("F1 score:", f1_score(y_test, y_pred))
 
     #help(class_imbalance)
