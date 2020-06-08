@@ -1,22 +1,22 @@
 from yellowbrick.classifier import PrecisionRecallCurve
 from sklearn.metrics import multilabel_confusion_matrix, accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
-
+import numpy as np
 def metrics(X_train, X_test, y_train, y_true, y_pred, labels = None):
     
     print('Accurancy:')
     acc = accuracy_score(y_true,y_pred)
     print(acc)
-    
-    
+       
     
     print('Final Classidication Report:')
     clf_rep = classification_report(y_true, y_pred, labels=labels)
+    cflrep = classification_report(y_true, y_pred, labels=labels, output_dict=True)
     print(clf_rep)
         
     
     print('Multilabel Confusion Matrix:')
-    mcm = multilabel_confusion_matrix(y_true,y_pred)
+    mcm = multilabel_confusion_matrix(y_true, y_pred)
     print(mcm)
     
     # print('Precision Recall Curve')
@@ -25,4 +25,4 @@ def metrics(X_train, X_test, y_train, y_true, y_pred, labels = None):
     # viz.score(X_test, y_true)
     # viz.show()
     
-    return
+    return(acc,cflrep,mcm)
