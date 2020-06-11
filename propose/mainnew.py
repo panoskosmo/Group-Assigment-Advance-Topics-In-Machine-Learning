@@ -1,7 +1,6 @@
 from class_imbal import *
 from Multi_Label import *
 from Metrics import *
-#from interpret import *
 import pandas as pd
 import numpy as np
 import matplotlib as plt
@@ -105,7 +104,6 @@ for clf in fclf:
     print("Some evaluation metrics for classifier:\n")
     acc,cflrep,mcm, hamls = metrics(x_train, x_test, y_train, y_test, y_pred, 0)#, labels=df.Class)
     all_metrics.update({clf[2]:{'Accurancy':acc, 'Classification Report':cflrep, 'Confusion Matrix':mcm},'Hamming Loss':hamls})
-    # tree_explanator(clf[0], x_train, y_train, y_pred, x_test, y_test, depth=1)
     
     
 print('\n\n=============================================================================\n') 
@@ -122,11 +120,3 @@ for key in all_metrics.keys():
     print("Weighted averaging: Precision: %g%% | Recall: %g%% | F1 Score: %g%% | Support: %g"%(round(all_metrics[key]['Classification Report']['weighted avg']['precision']*100,2), round(all_metrics[key]['Classification Report']['weighted avg']['recall']*100,2), round(all_metrics[key]['Classification Report']['weighted avg']['f1-score']*100,2), all_metrics[key]['Classification Report']['weighted avg']['support']))    
     print('\n-------------------------------------------------------------------------------\n')
     
-    #print(classification_report(y_test, y_pred, target_names=data.target_names))
-    #loss = cost_loss(y_test, y_pred, cost_matrix)
-    #print(confusion_matrix(y_test, y_pred).T
-
-    # print("Accurancy:", accuracy_score(y_test, y_pred))
-    # print("F1 score:", f1_score(y_test, y_pred))
-
-    #help(class_imbalance)
