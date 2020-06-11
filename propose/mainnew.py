@@ -1,7 +1,7 @@
 from class_imbal import *
 from Multi_Label import *
 from Metrics import *
-from intepret import *
+#from interpret import *
 import pandas as pd
 import numpy as np
 import matplotlib as plt
@@ -48,8 +48,9 @@ df.insert(loc=0,column="ft0",value=yy[:,1])
 
 ###############################################
 ###########  get basic model
-arclfs = [[RandomForestClassifier(n_estimators=100, random_state=0),"weka.classifiers.trees.RandomForest"],
-          [SVC(kernel='linear', probability=True, C=1),"weka.classifiers.functions.LibSVM"]
+arclfs = [
+          [RandomForestClassifier(n_estimators=100, random_state=0),"weka.classifiers.trees.RandomForest"],
+          [SVC(kernel='linear', probability=True, C=1), "weka.classifiers.functions.SMO"]
          ]
 choosenclsfr=0
 ###############################################
@@ -69,7 +70,6 @@ costval= int(input("\nWhat is the cost?(integer):"))
 #perfom the imbalancing actions
 x_train, x_test, y_train, y_test = class_imbal(df, 5,transformer,costclass,costval)
 
-
 ##############################################
 #it is required a base algorithm callibration before any cost sensitivity action
 upsampled=CalibratedClassifierCV(base_estimator=arclfs[0][0], method='sigmoid', cv=None)
@@ -88,7 +88,7 @@ fclf = [[class_multi_label(x_train, y_train,upsampled,arclfs[0][1],1),"Applying 
         [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],4),"Applying Chain Classifier", "SVC - Chain Classifier"],
         [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],5),"Applying powerset NO pruning", "SCV - Powerset NO pruning"],
         [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],6),"Applying powerset with pruning", "SCV - Powerset with pruning"],
-        [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],7),"Applying Random-k Labelsets", "SVC - Random-k Labelsets"],
+        #[class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],7),"Applying Random-k Labelsets", "SVC - Random-k Labelsets"],
         [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],8),"Applying pairwise comparison", "SVC - Pairwise comparison"]
        ]
 
@@ -97,14 +97,14 @@ print("\n\nEntering main fitting and predicting loop\n\n")
 all_metrics = {}
 
 for clf in fclf:
-    print(clf[1])
+    print("Fitting-------->>>>>>>>  ",clf[1])
     if clf[0]==0:
         continue;
     clf[0].fit(x_train, y_train)
     y_pred = clf[0].predict(x_test)
     print("Some evaluation metrics for classifier:\n")
-    acc,cflrep,mcm = metrics(x_train, x_test, y_train, y_test, y_pred, labels=df.Class)
-    all_metrics.update({clf[2]:{'Accurancy':acc, 'Classification Report':cflrep, 'Confusion Matrix':mcm}})
+    acc,cflrep,mcm, hamls = metrics(x_train, x_test, y_train, y_test, y_pred, 0)#, labels=df.Class)
+    all_metrics.update({clf[2]:{'Accurancy':acc, 'Classification Report':cflrep, 'Confusion Matrix':mcm},'Hamming Loss':hamls})
     # tree_explanator(clf[0], x_train, y_train, y_pred, x_test, y_test, depth=1)
     
     
@@ -115,6 +115,7 @@ for key in all_metrics.keys():
     print(key)
     print("\n")
     print("Accurancy: %g%%"%round(all_metrics[key]['Accurancy']*100,2))
+    print("Hamming LossAccurancy: %g%%"%round(all_metrics[key]['Hamming Loss']*100,2))
     print("Micro averaging: Precision: %g%% | Recall: %g%% | F1 Score: %g%% | Support: %g"%(round(all_metrics[key]['Classification Report']['micro avg']['precision']*100,2), round(all_metrics[key]['Classification Report']['micro avg']['recall']*100,2), round(all_metrics[key]['Classification Report']['micro avg']['f1-score']*100,2), all_metrics[key]['Classification Report']['micro avg']['support']))
     print("Macro averaging: Precision: %g%% | Recall: %g%% | F1 Score: %g%% | Support: %g"%(round(all_metrics[key]['Classification Report']['macro avg']['precision']*100,2), round(all_metrics[key]['Classification Report']['macro avg']['recall']*100,2), round(all_metrics[key]['Classification Report']['macro avg']['f1-score']*100,2), all_metrics[key]['Classification Report']['macro avg']['support']))
     print("Samples averaging: Precision: %g%% | Recall: %g%% | F1 Score: %g%% | Support: %g"%(round(all_metrics[key]['Classification Report']['samples avg']['precision']*100,2), round(all_metrics[key]['Classification Report']['samples avg']['recall']*100,2), round(all_metrics[key]['Classification Report']['samples avg']['f1-score']*100,2), all_metrics[key]['Classification Report']['samples avg']['support']))

@@ -26,7 +26,7 @@ def class_imbal(df,n_feature, transformer,costclass,costval):
     ######################################
     ##### random over sampling on specific class
     ttt=np.count_nonzero(y_train.to_numpy() == costclass)
-    if ttt>0:
+    if (ttt>0) & (costval>0):
         ros = RandomOverSampler(sampling_strategy={costclass:(ttt*costval)}, random_state=0)
         x_train, y_train = ros.fit_resample(x_train, y_train)
 
