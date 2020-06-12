@@ -5,7 +5,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE
 import numpy as np
 import sys
 
-def class_imbal(df,n_feature, transformer,costclass,costval):
+def class_imbal(df,n_feature, transformer,costclass,costval,slct_method):
        
     classes = df.Class.unique()
         
@@ -33,29 +33,32 @@ def class_imbal(df,n_feature, transformer,costclass,costval):
     ####################################################################################
 ###### Menu
 ####################################################################################
-    print('\n')
-    print(80*'~')
-        
-    print('1.Random Over-Sampling (auto)',
-          '\n2.Random Over-Sampling (not majority)',
-          '\n3.Random Over-Sampling (all)',
-          '\n4.Random Over-Sampling using SMOTE (auto)',
-          '\n5.Random Over-Sampling using SMOTE (not majority)',
-          '\n6.Random Over-Sampling using SMOTE (all)',
-          '\n0.Split to train - test set without any modification.')
- 
-    print(80*'~')
-    print('\n')
-        
+    if (slct_method<0) & (slct_method>6):
+        print('\n')
+        print(80*'~')
+        print('1.Random Over-Sampling (auto)',
+              '\n2.Random Over-Sampling (not majority)',
+              '\n3.Random Over-Sampling (all)',
+              '\n4.Random Over-Sampling using SMOTE (auto)',
+              '\n5.Random Over-Sampling using SMOTE (not majority)',
+              '\n6.Random Over-Sampling using SMOTE (all)',
+              '\n0.Split to train - test set without any modification.')
+
+        print(80*'~')
+        print('\n')
+
     try:
-        method = int(input("Select a method for deal with imbalanced data:"))
-    
+        if (slct_method < 0) & (slct_method > 6):
+            method = int(input("Select a method for deal with imbalanced data:"))
+        else:
+            method=slct_method
+
     except:
         print('Invalide choice!\nChoose another!')
-   
+
     else:
         #If selected method is 'Random Under-Sampling for majority class'
-        if method == 1:  
+        if method == 1:
             
             print("\n\n-----------------------------------------------------------\n")
             print('Random Over-Sampling (auto)')
@@ -143,6 +146,4 @@ def class_imbal(df,n_feature, transformer,costclass,costval):
             print("Return train - test set without any modification")
 
 
-        #print("Resampled classes:\n")
-        #print(sorted(Counter(y_train).items()))
         return(x_train, x_test.to_numpy(), y_train, y_test)
