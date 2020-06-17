@@ -58,7 +58,8 @@ def class_multi_label(x, Y, model, wekamodelname, value):
     if (num_of_labels==1):
          print("This is not a multi-label problem!!!!!!")
          return model
-    javapath="C:\\""Program Files""\\Java\\jdk-13\\bin\\javaw.exe"
+    javapath="C:\\""Program Files""\\Java\\jre1.8.0_251\\bin\\javaw.exe"
+
     myclasspath=download_meka()
     print(myclasspath)
     try:

@@ -20,7 +20,7 @@ from sklearn.svm import SVC
 from skmultilearn.ext import download_meka
 from skmultilearn.ext import Meka
 from ipywidgets import interactive
-#from costcla.metrics import cost_loss
+from costcla.metrics import cost_loss
 
 #### reading artff files of a gene instance file.
 data = arff.loadarff('genbase.arff')
@@ -83,21 +83,21 @@ for ampl_m in range(1,6):
     fclf = [
             #[class_multi_label(x_train, y_train, 0, 0, 9), "Applying Multilabel k Nearest Neighbours", "SVM_KK - MLKnn"],
             [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],1),"Applying binary relevance", "RFC - Binary Relevance"],
-            #[class_multi_label(x_train, y_train,upsampled,arclfs[0][1],2),"Duplicates multi-label examples into examples with one label each", "RFC - Multi-label examples into examples with one label each"],
-            #[class_multi_label(x_train, y_train,upsampled,arclfs[0][1],3),"Applying calibrated label ranking", "RFC - Calibrated label ranking"],
+            [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],2),"Duplicates multi-label examples into examples with one label each", "RFC - Multi-label examples into examples with one label each"],
+            [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],3),"Applying calibrated label ranking", "RFC - Calibrated label ranking"],
             [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],4),"Applying Chain Classifier", "RFC - Chain Classifier"],
             [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],5),"Applying powerset NO pruning", "RFC - Powerset NO pruning"],
             [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],6),"Applying powerset with pruning", "RFC - Powerset with pruning"],
             [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],7),"Applying Random-k Labelsets", "RFC - Random-k Labelsets"],
-            #[class_multi_label(x_train, y_train,upsampled,arclfs[0][1],8),"Applying pairwise comparison", "RFC - Pairwise comparison"],
+            [class_multi_label(x_train, y_train,upsampled,arclfs[0][1],8),"Applying pairwise comparison", "RFC - Pairwise comparison"],
             [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],1),"Applying binary relevance", "SVC - Binary Relevance"],
-            #[class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],2),"Duplicates multi-label examples into examples with one label each", "SVC - Multi-label examples into examples with one label each"],
-            #[class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],3),"Applying calibrated label ranking", "SVC - Calibrated label ranking"],
+            [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],2),"Duplicates multi-label examples into examples with one label each", "SVC - Multi-label examples into examples with one label each"],
+            [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],3),"Applying calibrated label ranking", "SVC - Calibrated label ranking"],
             [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],4),"Applying Chain Classifier", "SVC - Chain Classifier"],
             [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],5),"Applying powerset NO pruning", "SVC - Powerset NO pruning"],
             [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],6),"Applying powerset with pruning", "SVC - Powerset with pruning"],
-            #[class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],7),"Applying Random-k Labelsets", "SVC - Random-k Labelsets"],
-            #[class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],8),"Applying pairwise comparison", "SVC - Pairwise comparison"]
+            [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],7),"Applying Random-k Labelsets", "SVC - Random-k Labelsets"],
+            [class_multi_label(x_train, y_train,upsampled2,arclfs[1][1],8),"Applying pairwise comparison", "SVC - Pairwise comparison"]
            ]
 
     print("\n\nEntering main fitting and predicting loop\n\n")
@@ -123,10 +123,9 @@ for ampl_m in range(1,6):
         tp = np.zeros((b_y_test.shape[0], 1))
         tn = np.zeros((b_y_test.shape[0], 1))
         cost_matrix = np.hstack((fp, fn, tp, tn))
-        loss = 0 #cost_loss(b_y_test, b_y_pred, cost_matrix)
+        loss = cost_loss(b_y_test, b_y_pred, cost_matrix)
         ###########################
         all_metrics.update({clf[2]:{'Accurancy':acc, 'Classification Report':cflrep, 'Confusion Matrix':mcm,'Hamming Loss':hamls,'Cost Loss':loss}})
-        # tree_explanator(clf[0], x_train, y_train, y_pred, x_test, y_test, depth=1)
 
 
     print('\n\n=============================================================================\n')
